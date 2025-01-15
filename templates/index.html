@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style Transfer App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Neural Style Transfer</h1>
+    <form id="style-transfer-form" method="POST" enctype="multipart/form-data">
+        <label for="content">Content Image:</label><br/>
+        <input type="file" id="content" name="content" accept="image/*" required><br/><br/>
+        <label for="style">Style Image:</label><br/>
+        <input type="file" id="style" name="style" accept="image/*" required><br/><br/>
+        <input type="submit" value="Transfer Style">
+    </form>
+    <br/>
+    <img id="loading" src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..." style="display:none;">
+    <img id="output-image" src="" alt="Output Image" style="display:none;">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('style-transfer-form');
+            const loading = document.getElementById('loading');
+            const outputImage = document.getElementById('output-image');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                // Show loading spinner
+                loading.style.display = 'block';
+                outputImage.style.display = 'none';
+
+                // Create FormData object
+                const formData = new FormData(form);
+
+                // Send form data to the server using Fetch API
+                fetch('/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text(); // Get the URL of the output image
+                })
+                .then(imageUrl => {
+                    // Display the output image
+                    outputImage.src = imageUrl;
+                    outputImage.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred during style transfer.');
+                })
+                .finally(() => {
+                    // Hide loading spinner
+                    loading.style.display = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
